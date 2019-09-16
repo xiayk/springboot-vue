@@ -1,12 +1,6 @@
 <template>
   <div class="login layui-anim layui-anim-up">
-    <form
-      method="post"
-      class="layui-form"
-      id="login"
-      action="javascript:;"
-      v-if="login_type"
-    >
+    <form method="post" class="layui-form" id="login" action="javascript:;" v-if="login_type">
       <div @click="changeType" class="msgText">扫码登录</div>
       <input
         name="username"
@@ -26,7 +20,7 @@
         class="layui-input"
       />
       <hr class="hr15" />
-      <el-button value="登录" type="primary" style="width:100%;" :loading="load" @click="login">登录</el-button>
+      <el-button value="登录" type="primary" style="width:100%;" :loading="load" v-loading.fullscreen.lock="load" @click="login">登录</el-button>
       <hr class="hr20" />
     </form>
     <div v-if="!login_type" class="qrcode">
@@ -46,7 +40,7 @@
 </template>
 
 <style>
-#msg{
+#msg {
   display: none;
 }
 #msg,
@@ -167,23 +161,26 @@ export default {
   },
   methods: {
     login() {
+      this.load = true;
       let _this = this;
-      layui.use("layer", function() {
-        var layer = layui.layer;
-        _this.load = true;
-        login(_this.login_data)
-          .then(res => {
-            if (res.success) {
-              layer.msg("登录成功", { icon: 1 });
-              window.sessionStorage.setItem("XWEB_TOKEN", res.data);
-              _this.$router.replace({ path: "/" });
-            } else {
-              layer.msg(res.data.errorMessage, { icon: 5 });
-              _this.load = false;
-            }
-          })
-          .catch(failResponse => {});
-      });
+      login(_this.login_data)
+        .then(res => {
+          if (res.success) {
+            _this.$message({
+              message: "登录成功",
+              type: "success"
+            });
+            window.sessionStorage.setItem("XWEB_TOKEN", res.data);
+            _this.$router.replace({ path: "/" });
+          } else {
+            _this.$message({
+              message: res.data.errorMessage,
+              type: "warning"
+            });
+            _this.load = false;
+          }
+        })
+        .catch(failResponse => {});
     },
     changeType() {
       this.login_type = !this.login_type;
@@ -222,7 +219,7 @@ export default {
             setInterval(function() {
               http("/g/login/scan/pool", { code: uuid }).then(result => {
                 if (result.code == 200) {
-                  $("#msg").show()
+                  $("#msg").show();
                   layer.msg("登录成功", { icon: 1 });
                 } else if (result.code == 40099) {
                   layer.msg("二维码过期", { icon: 5 });

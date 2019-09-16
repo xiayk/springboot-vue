@@ -31,6 +31,14 @@ export function getType(data) {
     }
 }
 
+// export function getTypeClass(arr){
+//     for(const key in arr){
+//         if(arr[key]=='image'){
+//             return 
+//         }
+//     }
+// }
+
 export function formateArr(data){
     let arr = [];
     console.log(data)
@@ -38,4 +46,22 @@ export function formateArr(data){
         arr.push(data[key].substring(0, data[key].length-1));
     }
     return arr;
+}
+
+export function formateFileName(data){
+    debugger
+    if(data.lastIndexOf('/')==-1){
+        return data;
+    }
+    let str = data.substring(data.lastIndexOf('/'), data.length)
+    // let arr = [];
+    // console.log(data)
+    // for (const key in data) {
+    //     if(data[key].lastIndexOf('/')!=-1){
+    //         arr.push(data[key].substring(data[key].lastIndexOf('/'), data[key].length));
+    //     }else{
+    //         arr.push(data[key])
+    //     }
+    // }
+    return str;
 }
