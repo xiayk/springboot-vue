@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import login from '@/views/login/login'
-import test from '@/views/test'
+import order from '@/views/admin/order'
 import index from '@/views/index'
 import cloud from '@/views/cloud/index'
 
@@ -20,9 +20,9 @@ export default new Router({
       component: cloud
     },
     {
-      path: '/test',
-      name: 'test',
-      component: test
+      path: '/order',
+      name: 'order',
+      component: order
     },
     {
       path: '/',

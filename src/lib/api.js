@@ -10,7 +10,7 @@ class HttpRequest {
         const config = {
             baseURL: this.baseUrl,
             headers: {
-                "XWEB_TOKEN": "123"
+                "XWEB_TOKEN": window.sessionStorage.getItem("XWEB_TOKEN") || ""
             },
             method:"post"
         }

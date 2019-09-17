@@ -1,32 +1,25 @@
 <template>
   <div class="box">
-    <el-button @click="doUpload">上传文件</el-button>
-    <el-button @click="doUpload">新建文件夹</el-button>
-    <el-button @click="doUpload">删除选中</el-button>
-    <el-breadcrumb separator="/" style="margin:30px;">
-      <el-breadcrumb-item>
-        <a @click="dohome">根目录</a>
-      </el-breadcrumb-item>
-      <el-breadcrumb-item v-for="(p,index) in path" v-bind:key="p">
-        <a @click="toFolder(index)">{{p}}</a>
-      </el-breadcrumb-item>
-    </el-breadcrumb>
     <el-table
       :data="fileList"
       style="width: 100%"
       v-loading="loading"
       element-loading-text="拼命加载中"
       element-loading-spinner="el-icon-loading"
-      show-header="false"
       height="900"
     >
       <el-table-column type="selection" width="50" height="50"></el-table-column>
-      <el-table-column
-        label="文件名"
-        width="500"
-        show-overflow-tooltip="true"
-        row-click="toFile(scope.row)"
-      >
+      <el-table-column min-width="400" show-overflow-tooltip>
+        <template slot="header">
+          <el-breadcrumb separator="/">
+            <el-breadcrumb-item>
+              <a @click="dohome">根目录</a>
+            </el-breadcrumb-item>
+            <el-breadcrumb-item v-for="(p,index) in path" v-bind:key="p">
+              <a @click="toFolder(index)">{{p}}</a>
+            </el-breadcrumb-item>
+          </el-breadcrumb>
+        </template>
         <template slot-scope="scope">
           <i :class="scope.row | getTypes"></i>
           <!-- el-icon-folder
@@ -52,7 +45,7 @@
             trigger="hover"
             v-if="scope.row.key!=null"
           >
-            <el-image
+            <el-image lazy
               style="width: 150px; height: 150px"
               :src="'https://xiayk-1251881986.cos.ap-chengdu.myqcloud.com/' + scope.row.key"
             ></el-image>
@@ -60,17 +53,24 @@
           </el-popover>
         </template>
       </el-table-column>
-      <el-table-column label="文件大小" width="130">
+      <el-table-column width="130">
         <template slot-scope="scope">
           <span v-if="scope.row.size!=null">{{ scope.row.size / 1024 | numFilter}} KB</span>
         </template>
       </el-table-column>
-      <el-table-column label="时间" width="200">
+      <el-table-column width="200">
+        <template slot="header">
+          <el-button @click="doUpload" size="mini" icon="el-icon-upload">上传</el-button>
+          <el-button @click="newFolder" size="mini" icon="el-icon-folder-add">新建</el-button>
+        </template>
         <template slot-scope="scope">
           <span v-if="scope.row.lastModified!=null">{{ scope.row.lastModified | formatDate}}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" min-width="100">
+      <el-table-column min-width="240" align="center">
+        <template slot="header">
+          <el-button @click="doUpload" size="mini" icon="el-icon-delete">删除选中</el-button>
+        </template>
         <template slot-scope="scope">
           <el-button
             @click.native.prevent="editRow(scope.$index, fileList)"
@@ -86,7 +86,7 @@
       </el-table-column>
     </el-table>
     <el-dialog title="提示" :visible.sync="dialogVisible" width="500px" :before-close="handleClose">
-      <upload v-bind:message="nowPath"></upload>
+      <upload v-bind:nowPath="nowPath"></upload>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
@@ -136,6 +136,26 @@ export default {
       this.nowPath = "";
       this.getFile("");
     },
+    newFolder() {
+      this.$prompt("文件夹名称", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消"
+      })
+        .then(({ value }) => {
+          this.fileList.push(value);
+          this.toFolder(value);
+          this.$message({
+            type: "success",
+            message: value + "创建成功"
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "取消创建"
+          });
+        });
+    },
     deleteRow(index, rows) {
       this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
         confirmButtonText: "确定",
@@ -143,7 +163,7 @@ export default {
         type: "warning"
       })
         .then(() => {
-          rows.splice(index, 1)
+          rows.splice(index, 1);
           this.$message({
             type: "success",
             message: "删除成功!"
@@ -158,10 +178,8 @@ export default {
     },
     toFile(data) {
       if (data.key) {
-        
       } else {
         this.path.push(data);
-        console.log(this.path);
         this.nowPath += data + "/";
         this.getFile(this.nowPath);
       }
